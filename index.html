@@ -60,4 +60,393 @@
     }
 
     .btn-copy {
+      background: #3498db;
+      color: white;
+    }
+
+    pre {
+      background: #222;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      font-size: 15px;
+    }
+
+    .totais {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .mini-card {
+      background: #fafafa;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    .numero {
+      font-size: 35px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    canvas {
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<h1>Lista dos Executivos</h1>
+
+<div class="card">
+
+  <label>Escolha o ônibus</label>
+
+  <select id="onibus">
+    <option value="Executivo 1">Executivo 1</option>
+    <option value="Executivo Uninta">Executivo Uninta</option>
+  </select>
+
+  <label>Seu nome</label>
+
+  <input type="text" id="nome" placeholder="Digite seu nome">
+
+  <label>Instituição / Parada</label>
+
+  <input type="text" id="instituicao" placeholder="Digite sua instituição">
+
+  <button class="btn-add" onclick="adicionarNome()">
+    Entrar na Lista
+  </button>
+
+  <button class="btn-remove" onclick="removerNome()">
+    Tirar Meu Nome
+  </button>
+
+  <button class="btn-copy" onclick="copiarLista()">
+    Copiar Lista Para WhatsApp
+  </button>
+
+</div>
+
+<div class="totais">
+
+  <div class="mini-card">
+    Executivo 1
+    <div class="numero" id="totalExec1">0</div>
+  </div>
+
+  <div class="mini-card">
+    Executivo Uninta
+    <div class="numero" id="totalExec2">0</div>
+  </div>
+
+  <div class="mini-card">
+    Total Geral
+    <div class="numero" id="totalGeral">0</div>
+  </div>
+
+</div>
+
+<div class="card">
+  <h2>Gráfico em Tempo Real</h2>
+  <canvas id="grafico"></canvas>
+</div>
+
+<div class="card">
+  <h2>Lista Atual</h2>
+  <pre id="lista"></pre>
+</div>
+
+<div class="card">
+  <h2>Total por Instituição</h2>
+  <pre id="totaisInstituicao"></pre>
+</div>
+
+<div class="card">
+  <h2>Removidos Após 15:00</h2>
+  <pre id="listaAtrasados"></pre>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCIKs2HxpBQVflmvybEwgSiC3M0Q-abbXc",
+  authDomain: "lista-onibus.firebaseapp.com",
+  projectId: "lista-onibus",
+  storageBucket: "lista-onibus.firebasestorage.app",
+  messagingSenderId: "140892082129",
+  appId: "1:140892082129:web:b1ab4052d750e03345daf0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let lista = [];
+let removidosAtrasados = [];
+
+const grafico = new Chart(document.getElementById('grafico'), {
+  type: 'bar',
+  data: {
+    labels: ['Executivo 1', 'Executivo Uninta'],
+    datasets: [{
+      label: 'Quantidade de Pessoas',
+      data: [0, 0]
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+onSnapshot(collection(db, "listaExecutivos"), (snapshot) => {
+
+  lista = [];
+
+  snapshot.forEach((docItem) => {
+
+    lista.push({
+      id: docItem.id,
+      ...docItem.data()
+    });
+
+  });
+
+  atualizarTela();
+
+});
+
+function horarioEmMinutos() {
+
+  const agora = new Date();
+
+  return agora.getHours() * 60 + agora.getMinutes();
+}
+
+window.adicionarNome = async function () {
+
+  const nome = document.getElementById('nome').value.trim();
+  const instituicao = document.getElementById('instituicao').value.trim();
+  const onibus = document.getElementById('onibus').value;
+
+  if (!nome || !instituicao) {
+    alert('Preencha todos os campos');
+    return;
+  }
+
+  const existente = lista.find(item =>
+    item.nome.toLowerCase() === nome.toLowerCase()
+  );
+
+  if (existente) {
+
+    await deleteDoc(doc(db, 'listaExecutivos', existente.id));
+  }
+
+  await addDoc(collection(db, 'listaExecutivos'), {
+    nome,
+    instituicao,
+    onibus,
+    horario: new Date().toLocaleTimeString()
+  });
+
+  document.getElementById('nome').value = '';
+  document.getElementById('instituicao').value = '';
+
+  alert('Nome adicionado');
+
+}
+
+window.removerNome = async function () {
+
+  const nome = document.getElementById('nome').value.trim();
+
+  if (!nome) {
+    alert('Digite seu nome');
+    return;
+  }
+
+  const pessoa = lista.find(item =>
+    item.nome.toLowerCase() === nome.toLowerCase()
+  );
+
+  if (!pessoa) {
+    alert('Nome não encontrado');
+    return;
+  }
+
+  if (horarioEmMinutos() > 900) {
+
+    removidosAtrasados.push({
+      nome: pessoa.nome,
+      instituicao: pessoa.instituicao,
+      onibus: pessoa.onibus,
+      horario: new Date().toLocaleTimeString()
+    });
+
+  }
+
+  await deleteDoc(doc(db, 'listaExecutivos', pessoa.id));
+
+  atualizarTela();
+
+  alert('Nome removido');
+
+}
+
+window.copiarLista = function () {
+
+  let texto = 'LISTA DOS EXECUTIVOS\n\n';
+
+  const exec1 = lista.filter(item => item.onibus === 'Executivo 1');
+  const exec2 = lista.filter(item => item.onibus === 'Executivo Uninta');
+
+  texto += 'EXECUTIVO 1\n\n';
+
+  exec1.forEach(item => {
+    texto += '- ' + item.nome + ' | ' + item.instituicao + '\n';
+  });
+
+  texto += '\n-----------------------\n\n';
+
+  texto += 'EXECUTIVO UNINTA\n\n';
+
+  exec2.forEach(item => {
+    texto += '- ' + item.nome + ' | ' + item.instituicao + '\n';
+  });
+
+  navigator.clipboard.writeText(texto);
+
+  alert('Lista copiada para colar no WhatsApp');
+
+}
+
+function atualizarTela() {
+
+  const listaElement = document.getElementById('lista');
+  const totaisElement = document.getElementById('totaisInstituicao');
+  const atrasadosElement = document.getElementById('listaAtrasados');
+
+  let texto = '';
+
+  const onibusLista = ['Executivo 1', 'Executivo Uninta'];
+
+  onibusLista.forEach(onibus => {
+
+    texto += onibus.toUpperCase() + '\n\n';
+
+    const pessoas = lista.filter(item => item.onibus === onibus);
+
+    if (pessoas.length === 0) {
+
+      texto += '- Nenhuma pessoa\n\n';
+
+    } else {
+
+      pessoas.forEach(pessoa => {
+
+        texto += '- ' + pessoa.nome + ' | ' + pessoa.instituicao + '\n';
+
+      });
+
+      texto += '\n';
+    }
+
+    texto += '--------------------------\n\n';
+
+  });
+
+  listaElement.textContent = texto;
+
+  let contagemInstituicoes = {};
+
+  lista.forEach(item => {
+
+    const chave = item.instituicao.toUpperCase();
+
+    if (!contagemInstituicoes[chave]) {
+      contagemInstituicoes[chave] = 0;
+    }
+
+    contagemInstituicoes[chave]++;
+
+  });
+
+  let textoTotais = '';
+
+  for (let instituicao in contagemInstituicoes) {
+
+    textoTotais +=
+      instituicao +
+      ': ' +
+      contagemInstituicoes[instituicao] +
+      ' pessoa(s)\n';
+
+  }
+
+  totaisElement.textContent = textoTotais || 'Nenhuma pessoa';
+
+  let atrasadosTexto = '';
+
+  if (removidosAtrasados.length === 0) {
+
+    atrasadosTexto = 'Nenhum removido após 15:00';
+
+  } else {
+
+    removidosAtrasados.forEach(item => {
+
+      atrasadosTexto +=
+        '- ' +
+        item.nome +
+        ' | ' +
+        item.instituicao +
+        ' | ' +
+        item.horario +
+        '\n';
+
+    });
+
+  }
+
+  atrasadosElement.textContent = atrasadosTexto;
+
+  const totalExec1 = lista.filter(item => item.onibus === 'Executivo 1').length;
+  const totalExec2 = lista.filter(item => item.onibus === 'Executivo Uninta').length;
+
+  document.getElementById('totalExec1').textContent = totalExec1;
+  document.getElementById('totalExec2').textContent = totalExec2;
+  document.getElementById('totalGeral').textContent = lista.length;
+
+  grafico.data.datasets[0].data = [totalExec1, totalExec2];
+  grafico.update();
+
+}
+
+</script>
+
+</body>
 </html>
