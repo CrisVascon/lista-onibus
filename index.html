@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Lista dos Ônibus</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 
 body{
     font-family: Arial, sans-serif;
-    background:#f5f7fa;
+
+    background:
+    linear-gradient(
+    rgba(255,255,255,0.90),
+    rgba(255,255,255,0.90)
+    ),
+    url('https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg');
+
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
     margin:0;
     padding:20px;
     color:#111;
@@ -34,19 +45,6 @@ header h1{
     letter-spacing:2px;
 }
 
-.sub{
-    text-align:center;
-    margin-top:10px;
-    color:#d4af37;
-    font-weight:bold;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:15px;
-}
-
 .card{
     background:white;
     border-radius:18px;
@@ -56,7 +54,29 @@ header h1{
     border-top:5px solid #d4af37;
 }
 
-input,select,button{
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.mini{
+    background:#f1f1f1;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+}
+
+.numero{
+    font-size:40px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+input,
+select,
+button{
     width:100%;
     padding:12px;
     margin-top:10px;
@@ -92,24 +112,6 @@ button:hover{
     color:white;
 }
 
-.btn-admin{
-    background:#0b1f44;
-    color:white;
-}
-
-.mini{
-    background:#f1f1f1;
-    border-radius:15px;
-    padding:20px;
-    text-align:center;
-}
-
-.numero{
-    font-size:40px;
-    font-weight:bold;
-    margin-top:10px;
-}
-
 pre{
     background:#111;
     color:#00ff66;
@@ -126,13 +128,6 @@ pre{
     color:#0b1f44;
 }
 
-.online{
-    color:#2ecc71;
-    font-weight:bold;
-    text-align:center;
-    margin-top:10px;
-}
-
 .loading{
     position:fixed;
     inset:0;
@@ -146,6 +141,7 @@ pre{
 }
 
 </style>
+
 </head>
 
 <body>
@@ -158,50 +154,58 @@ Carregando...
 
 <h1>Lista dos Ônibus</h1>
 
-<div class="sub">
-Sistema Online em Tempo Real
-</div>
-
-<div class="online" id="online">
-0 pessoas online
-</div>
-
 </header>
 
 <div class="card">
 
-<button class="btn-admin" onclick="abrirAdmin()">
-🔐 Entrar no Painel Admin
-</button>
-
-<button class="btn-admin" onclick="sairAdmin()">
-🚪 Sair do Admin
-</button>
-
 <label>Escolha o ônibus</label>
 
 <select id="onibus">
-<option value="Executivo 1">Executivo 1</option>
-<option value="Executivo Uninta">Executivo Uninta</option>
+
+<option value="Executivo 1">
+Executivo 1
+</option>
+
+<option value="Executivo Uninta">
+Executivo Uninta
+</option>
+
 </select>
 
 <label>Nome</label>
 
-<input type="text" id="nome" placeholder="Digite seu nome">
+<input
+type="text"
+id="nome"
+placeholder="Digite seu nome"
+>
 
 <label>Instituição / Parada</label>
 
-<input type="text" id="instituicao" placeholder="Digite sua instituição">
+<input
+type="text"
+id="instituicao"
+placeholder="Digite sua instituição"
+>
 
-<button class="btn-add" onclick="adicionarNome()">
+<button
+class="btn-add"
+onclick="adicionarNome()"
+>
 ➕ Entrar na Lista
 </button>
 
-<button class="btn-remove" onclick="removerNome()">
+<button
+class="btn-remove"
+onclick="removerNome()"
+>
 ➖ Tirar Meu Nome
 </button>
 
-<button class="btn-copy" onclick="copiarLista()">
+<button
+class="btn-copy"
+onclick="copiarLista()"
+>
 📋 Copiar Lista
 </button>
 
@@ -209,7 +213,7 @@ Sistema Online em Tempo Real
 
 <div class="card">
 
-<h2>⏰ Contador</h2>
+<h2>⏰ Relógio</h2>
 
 <div id="contador"></div>
 
@@ -218,40 +222,56 @@ Sistema Online em Tempo Real
 <div class="grid">
 
 <div class="mini">
+
 Executivo 1
-<div class="numero" id="totalExec1">0</div>
+
+<div
+class="numero"
+id="totalExec1"
+>
+0
+</div>
+
 </div>
 
 <div class="mini">
+
 Executivo Uninta
-<div class="numero" id="totalExec2">0</div>
+
+<div
+class="numero"
+id="totalExec2"
+>
+0
+</div>
+
 </div>
 
 <div class="mini">
+
 Lista Extra
-<div class="numero" id="totalExtra">0</div>
+
+<div
+class="numero"
+id="totalExtra"
+>
+0
+</div>
+
 </div>
 
 <div class="mini">
+
 Total Geral
-<div class="numero" id="totalGeral">0</div>
+
+<div
+class="numero"
+id="totalGeral"
+>
+0
 </div>
 
 </div>
-
-<div class="card">
-
-<h2>📊 Quantidade de Pessoas</h2>
-
-<canvas id="grafico"></canvas>
-
-</div>
-
-<div class="card">
-
-<h2>🏆 Ranking de Instituições</h2>
-
-<pre id="ranking"></pre>
 
 </div>
 
@@ -265,31 +285,25 @@ Total Geral
 
 <div class="card">
 
-<h2>⚠️ Infrações</h2>
+<h2>🏫 Quantidade por Instituição</h2>
 
-<pre id="infractions"></pre>
-
-</div>
-
-<div class="card" id="painelAdmin" style="display:none;">
-
-<h2>🔐 Painel Administrativo</h2>
-
-<button class="btn-copy" onclick="copiarInfrações()">
-📋 Copiar Infrações
-</button>
-
-<pre id="adminLista"></pre>
+<pre id="totaisInstituicao"></pre>
 
 </div>
 
 <audio id="somEntrada" preload="auto">
-<source src="fortnite-knocked.mp3" type="audio/mpeg">
+
+<source
+src="fortnite-knocked.mp3"
+type="audio/mpeg"
+>
+
 </audio>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getFirestore,
@@ -297,128 +311,85 @@ collection,
 addDoc,
 deleteDoc,
 doc,
-onSnapshot,
-getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+onSnapshot
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "SUA_API",
+
+apiKey: "SUA_API_KEY",
+
 authDomain: "lista-onibus.firebaseapp.com",
+
 projectId: "lista-onibus",
+
 storageBucket: "lista-onibus.firebasestorage.app",
+
 messagingSenderId: "140892082129",
+
 appId: "1:140892082129:web:b1ab4052d750e03345daf0"
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
 let lista = [];
-let infrações = [];
-let adminAtivo = false;
 
-const grafico = new Chart(
-document.getElementById('grafico'),
-{
-type:'bar',
-data:{
-labels:['Executivo 1','Executivo Uninta','Lista Extra'],
-datasets:[{
-label:'Pessoas',
-data:[0,0,0]
-}]
-}
-}
-);
-
-function horarioMinutos(){
+function atualizarRelogio(){
 
 const agora = new Date();
 
-return agora.getHours()*60 + agora.getMinutes();
+const horas =
+String(agora.getHours()).padStart(2,'0');
+
+const minutos =
+String(agora.getMinutes()).padStart(2,'0');
+
+const segundos =
+String(agora.getSeconds()).padStart(2,'0');
+
+document.getElementById('contador')
+.innerHTML =
+horas + ':' + minutos + ':' + segundos;
 
 }
 
-function atualizarContador(){
-
-const agora = new Date();
-
-const alvo = new Date();
-
-alvo.setHours(10);
-alvo.setMinutes(30);
-alvo.setSeconds(0);
-
-const dif = alvo - agora;
-
-if(dif <= 0){
-
-document.getElementById('contador').innerHTML =
-'HORÁRIO ENCERRADO';
-
-return;
-}
-
-const h = Math.floor(dif/1000/60/60);
-const m = Math.floor((dif/1000/60)%60);
-const s = Math.floor((dif/1000)%60);
-
-document.getElementById('contador').innerHTML =
-h+'h '+m+'m '+s+'s';
-
-}
-
-setInterval(atualizarContador,1000);
-
-window.abrirAdmin = function(){
-
-const senha = prompt('Digite a senha');
-
-if(senha !== 'ronaldinhogauchopenta'){
-
-alert('Senha incorreta');
-
-return;
-}
-
-adminAtivo = true;
-
-document.getElementById('painelAdmin').style.display='block';
-
-alert('Modo administrador ativado');
-
-}
-
-window.sairAdmin = function(){
-
-adminAtivo = false;
-
-document.getElementById('painelAdmin').style.display='none';
-
-}
+setInterval(atualizarRelogio,1000);
 
 window.adicionarNome = async function(){
 
 const nome =
-document.getElementById('nome').value.trim();
+document.getElementById('nome')
+.value
+.trim();
 
 const instituicao =
-document.getElementById('instituicao').value.trim();
+document.getElementById('instituicao')
+.value
+.trim();
 
 const onibus =
-document.getElementById('onibus').value;
+document.getElementById('onibus')
+.value;
 
 if(!nome || !instituicao){
 
-alert('Preencha tudo');
+alert('Preencha todos os campos');
 
 return;
+
 }
 
-document.getElementById('somEntrada').play();
+document
+.getElementById('somEntrada')
+.play();
 
-const jaExiste = lista.find(item =>
-item.nome.toLowerCase() === nome.toLowerCase()
+const jaExiste =
+lista.find(item =>
+item.nome.toLowerCase() ===
+nome.toLowerCase()
 );
 
 if(jaExiste){
@@ -426,12 +397,15 @@ if(jaExiste){
 alert('Esse nome já está na lista');
 
 return;
+
 }
 
 let listaDestino = onibus;
 
 const totalMesmo =
-lista.filter(item => item.onibus === onibus).length;
+lista.filter(item =>
+item.onibus === onibus
+).length;
 
 if(totalMesmo >= 46){
 
@@ -439,39 +413,42 @@ listaDestino = 'Lista Extra';
 
 }
 
-const agora = new Date();
+await addDoc(
+collection(db,'listaExecutivos'),
+{
 
-const minutos = horarioMinutos();
-
-if(minutos < 420 || minutos > 630){
-
-infrações.push({
 nome,
 instituicao,
-tipo:'ENTRADA FORA DO HORÁRIO',
-horario:agora.toLocaleTimeString()
-});
+onibus: listaDestino,
+timestamp: Date.now()
 
 }
+);
 
-await addDoc(collection(db,'listaExecutivos'),{
-
-nome,
-instituicao,
-onibus:listaDestino,
-timestamp:Date.now()
-
-});
+document.getElementById('nome').value = '';
+document.getElementById('instituicao').value = '';
 
 }
 
 window.removerNome = async function(){
 
 const nome =
-document.getElementById('nome').value.trim();
+document.getElementById('nome')
+.value
+.trim();
 
-const pessoa = lista.find(item =>
-item.nome.toLowerCase() === nome.toLowerCase()
+if(!nome){
+
+alert('Digite seu nome');
+
+return;
+
+}
+
+const pessoa =
+lista.find(item =>
+item.nome.toLowerCase() ===
+nome.toLowerCase()
 );
 
 if(!pessoa){
@@ -479,81 +456,104 @@ if(!pessoa){
 alert('Nome não encontrado');
 
 return;
-}
-
-const agora = new Date();
-
-if(horarioMinutos() > 900){
-
-infrações.push({
-nome:pessoa.nome,
-instituicao:pessoa.instituicao,
-tipo:'REMOVEU APÓS 15:00',
-horario:agora.toLocaleTimeString()
-});
 
 }
 
-await deleteDoc(doc(db,'listaExecutivos',pessoa.id));
+await deleteDoc(
+doc(
+db,
+'listaExecutivos',
+pessoa.id
+)
+);
+
+alert('Nome removido');
 
 }
 
-window.copiarLista = function(){
+window.copiarLista = async function(){
 
 let texto = 'LISTA DOS ÔNIBUS\n\n';
 
-lista.forEach((item,index)=>{
+['Executivo 1','Executivo Uninta','Lista Extra']
+.forEach(onibus=>{
+
+texto += onibus.toUpperCase() + '\n\n';
+
+const pessoas =
+lista.filter(item =>
+item.onibus === onibus
+);
+
+if(pessoas.length === 0){
+
+texto += '- vazio\n\n';
+
+}else{
+
+pessoas.forEach((item,index)=>{
 
 texto +=
 (index+1)+'. '+
 item.nome+' | '+
-item.instituicao+' | '+
-item.onibus+'\n';
+item.instituicao+'\n';
 
 });
 
-navigator.clipboard.writeText(texto);
+texto += '\n';
+
+}
+
+});
+
+try{
+
+await navigator.clipboard.writeText(texto);
+
+alert('Lista copiada');
+
+}catch{
+
+const area =
+document.createElement('textarea');
+
+area.value = texto;
+
+document.body.appendChild(area);
+
+area.select();
+
+document.execCommand('copy');
+
+document.body.removeChild(area);
 
 alert('Lista copiada');
 
 }
 
-window.copiarInfrações = function(){
-
-let texto = '';
-
-infrações.forEach(item=>{
-
-texto +=
-item.nome+' | '+
-item.instituicao+' | '+
-item.tipo+' | '+
-item.horario+'\n';
-
-});
-
-navigator.clipboard.writeText(texto);
-
-alert('Infrações copiadas');
-
 }
 
-onSnapshot(collection(db,'listaExecutivos'),(snapshot)=>{
+onSnapshot(
+collection(db,'listaExecutivos'),
+(snapshot)=>{
 
 lista = [];
 
 snapshot.forEach((docItem)=>{
 
 lista.push({
-id:docItem.id,
+
+id: docItem.id,
 ...docItem.data()
+
 });
 
 });
 
 atualizarTela();
 
-});
+}
+);
 
 function atualizarTela(){
 
@@ -571,13 +571,21 @@ return a.timestamp - b.timestamp;
 
 let texto = '';
 
-['Executivo 1','Executivo Uninta','Lista Extra']
+[
+'Executivo 1',
+'Executivo Uninta',
+'Lista Extra'
+]
 .forEach(onibus=>{
 
-texto += onibus.toUpperCase()+'\n\n';
+texto +=
+onibus.toUpperCase() +
+'\n\n';
 
 const pessoas =
-lista.filter(item=>item.onibus===onibus);
+lista.filter(item =>
+item.onibus === onibus
+);
 
 if(pessoas.length === 0){
 
@@ -596,111 +604,90 @@ pessoa.instituicao+'\n';
 
 }
 
-texto += '\n-------------------\n\n';
+texto +=
+'\n-------------------\n\n';
 
 });
 
-document.getElementById('lista').textContent =
-texto;
+document
+.getElementById('lista')
+.textContent = texto;
 
 const total1 =
-lista.filter(x=>x.onibus==='Executivo 1').length;
+lista.filter(item =>
+item.onibus ===
+'Executivo 1'
+).length;
 
 const total2 =
-lista.filter(x=>x.onibus==='Executivo Uninta').length;
+lista.filter(item =>
+item.onibus ===
+'Executivo Uninta'
+).length;
 
 const totalExtra =
-lista.filter(x=>x.onibus==='Lista Extra').length;
+lista.filter(item =>
+item.onibus ===
+'Lista Extra'
+).length;
 
-document.getElementById('totalExec1').innerHTML =
-total1;
+document
+.getElementById('totalExec1')
+.innerHTML = total1;
 
-document.getElementById('totalExec2').innerHTML =
-total2;
+document
+.getElementById('totalExec2')
+.innerHTML = total2;
 
-document.getElementById('totalExtra').innerHTML =
-totalExtra;
+document
+.getElementById('totalExtra')
+.innerHTML = totalExtra;
 
-document.getElementById('totalGeral').innerHTML =
-lista.length;
+document
+.getElementById('totalGeral')
+.innerHTML = lista.length;
 
-grafico.data.datasets[0].data = [
-total1,
-total2,
-totalExtra
-];
-
-grafico.update();
-
-let ranking = {};
+let universidades = {};
 
 lista.forEach(item=>{
 
 const chave =
 item.instituicao.toUpperCase();
 
-ranking[chave] =
-(ranking[chave] || 0) + 1;
+universidades[chave] =
+(universidades[chave] || 0) + 1;
 
 });
 
-let rankingTexto = '';
+let textoUniversidades = '';
 
-Object.entries(ranking)
+Object.entries(universidades)
+
 .sort((a,b)=>b[1]-a[1])
-.forEach(([nome,total],index)=>{
 
-rankingTexto +=
-(index+1)+'. '+
-nome+' - '+
-total+' pessoa(s)\n';
+.forEach(([nome,total])=>{
 
-});
-
-document.getElementById('ranking').textContent =
-rankingTexto || 'Sem dados';
-
-document.getElementById('infractions').textContent =
-'Entradas fora do horário: '+
-infrações.filter(x=>x.tipo.includes('ENTRADA')).length+
-'\nRemoções após 15h: '+
-infrações.filter(x=>x.tipo.includes('REMOVEU')).length;
-
-if(adminAtivo){
-
-let adminTexto = '';
-
-infrações.forEach(item=>{
-
-adminTexto +=
-item.nome+' | '+
-item.instituicao+' | '+
-item.tipo+' | '+
-item.horario+'\n';
+textoUniversidades +=
+nome +
+': ' +
+total +
+' pessoa(s)\n';
 
 });
 
-document.getElementById('adminLista').textContent =
-adminTexto;
-
-}
-
-document.getElementById('online').innerHTML =
-lista.length + ' pessoas online';
-
-const agora = new Date();
-
-if(agora.getHours() >= 3){
-
-infrações = [];
-
-}
+document
+.getElementById('totaisInstituicao')
+.textContent =
+textoUniversidades ||
+'Sem dados';
 
 }
 
 setTimeout(()=>{
 
-document.getElementById('loading').style.display='none';
+document
+.getElementById('loading')
+.style.display='none';
 
 },1500);
 
