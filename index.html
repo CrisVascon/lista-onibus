@@ -128,12 +128,38 @@
   <pre id="totaisRemovidos"></pre>
 </div>
 
-<script>
+<script type="module">
 
-let lista = JSON.parse(localStorage.getItem('listaExecutivos')) || [];
-let removidosAtrasados = JSON.parse(localStorage.getItem('removidosAtrasados')) || [];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-// RESET ÀS 03:00
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCIKs2HxpBQVflmvybEwgSiC3M0Q-abbXc",
+  authDomain: "lista-onibus.firebaseapp.com",
+  projectId: "lista-onibus",
+  storageBucket: "lista-onibus.firebasestorage.app",
+  messagingSenderId: "140892082129",
+  appId: "1:140892082129:web:b1ab4052d750e03345daf0"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+console.log("Firebase conectado com sucesso");
+
+let lista = [];
+let removidosAtrasados = [];
+
+// RESET AUTOMÁTICO ÀS 03:00
 
 const hoje = new Date().toLocaleDateString();
 const ultimoReset = localStorage.getItem('ultimoReset');
@@ -141,22 +167,28 @@ const horaAtual = new Date().getHours();
 
 if (horaAtual >= 3 && ultimoReset !== hoje) {
 
-  lista = [];
-  removidosAtrasados = [];
-
-  localStorage.setItem('listaExecutivos', JSON.stringify(lista));
-  localStorage.setItem('removidosAtrasados', JSON.stringify(removidosAtrasados));
   localStorage.setItem('ultimoReset', hoje);
 
 }
 
-function salvar() {
+// SINCRONIZAÇÃO EM TEMPO REAL
 
-  localStorage.setItem('listaExecutivos', JSON.stringify(lista));
-  localStorage.setItem('removidosAtrasados', JSON.stringify(removidosAtrasados));
+onSnapshot(collection(db, "listaExecutivos"), (snapshot) => {
+
+  lista = [];
+
+  snapshot.forEach((docItem) => {
+
+    lista.push({
+      id: docItem.id,
+      ...docItem.data()
+    });
+
+  });
 
   atualizarTela();
-}
+
+});
 
 function horarioEmMinutos() {
 
@@ -170,7 +202,7 @@ function podeRemoverSemAtraso() {
   return horarioEmMinutos() <= 900;
 }
 
-function adicionarNome() {
+window.adicionarNome = async function() {
 
   const nome = document.getElementById('nome').value.trim();
 
@@ -185,23 +217,33 @@ function adicionarNome() {
     return;
   }
 
-  lista = lista.filter(item =>
-    item.nome.toLowerCase() !== nome.toLowerCase()
+  const pessoaExistente = lista.find(item =>
+    item.nome.toLowerCase() === nome.toLowerCase()
   );
 
-  lista.push({
+  if (pessoaExistente) {
+
+    await deleteDoc(
+      doc(db, "listaExecutivos", pessoaExistente.id)
+    );
+  }
+
+  await addDoc(collection(db, "listaExecutivos"), {
+
     nome,
     instituicao,
     onibus
+
   });
 
-  salvar();
+  document.getElementById('nome').value = '';
+  document.getElementById('instituicao').value = '';
 
   alert('Nome adicionado');
 
 }
 
-function removerNome() {
+window.removerNome = async function() {
 
   const nome = document.getElementById('nome').value.trim();
 
@@ -226,19 +268,17 @@ function removerNome() {
   if (!podeRemoverSemAtraso()) {
 
     removidosAtrasados.push({
+
       nome: pessoa.nome,
       instituicao: pessoa.instituicao,
       onibus: pessoa.onibus,
       horario: new Date().toLocaleTimeString()
+
     });
 
   }
 
-  lista = lista.filter(item =>
-    item.nome.toLowerCase() !== nome.toLowerCase()
-  );
-
-  salvar();
+  await deleteDoc(doc(db, "listaExecutivos", pessoa.id));
 
   alert('Nome removido');
 
@@ -383,33 +423,6 @@ function atualizarTela() {
     textoRemovidos || 'Nenhum removido após 15:00';
 
 }
-
-atualizarTela();
-
-</script>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getFirestore
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCIKs2HxpBQVflmvybEwgSiC3M0Q-abbXc",
-  authDomain: "lista-onibus.firebaseapp.com",
-  projectId: "lista-onibus",
-  storageBucket: "lista-onibus.firebasestorage.app",
-  messagingSenderId: "140892082129",
-  appId: "1:140892082129:web:b1ab4052d750e03345daf0"
-};
-
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-console.log("Firebase conectado com sucesso");
 
 </script>
 
