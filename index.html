@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista dos Executivos</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Executivos Online</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
 
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
+      margin: 0;
       padding: 20px;
-      max-width: 900px;
+      max-width: 1100px;
       margin: auto;
     }
 
     h1 {
       text-align: center;
+      margin-bottom: 30px;
     }
 
     .card {
       background: white;
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 15px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    input, select, button {
+    input,
+    select,
+    button {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
@@ -53,378 +59,5 @@
       color: white;
     }
 
-    pre {
-      background: #222;
-      color: #0f0;
-      padding: 15px;
-      border-radius: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
-
-    .horario {
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-
-  </style>
-
-</head>
-
-<body>
-
-<h1>Lista dos Executivos</h1>
-
-<div class="horario">
-  Adicionar nomes: livre para testes<br>
-  Remover sem aviso: até 15:00
-</div>
-
-<div class="card">
-
-  <label>Escolha o ônibus</label>
-
-  <select id="onibus">
-    <option value="Executivo 1">Executivo 1</option>
-    <option value="Executivo Uninta">Executivo Uninta</option>
-  </select>
-
-  <label>Seu nome</label>
-
-  <input type="text" id="nome" placeholder="Digite seu nome">
-
-  <label>Instituição / Parada</label>
-
-  <input type="text" id="instituicao" placeholder="Digite sua instituição">
-
-  <button class="btn-add" onclick="adicionarNome()">
-    Entrar na Lista
-  </button>
-
-  <button class="btn-remove" onclick="removerNome()">
-    Tirar Meu Nome
-  </button>
-
-</div>
-
-<div class="card">
-  <h2>Lista Atual</h2>
-  <pre id="lista"></pre>
-</div>
-
-<div class="card">
-  <h2>Removidos Após 15:00</h2>
-  <pre id="listaAtrasados"></pre>
-</div>
-
-<div class="card">
-  <h2>Total por Instituição</h2>
-  <pre id="totaisInstituicao"></pre>
-</div>
-
-<div class="card">
-  <h2>Total dos Removidos por Instituição</h2>
-  <pre id="totaisRemovidos"></pre>
-</div>
-
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCIKs2HxpBQVflmvybEwgSiC3M0Q-abbXc",
-  authDomain: "lista-onibus.firebaseapp.com",
-  projectId: "lista-onibus",
-  storageBucket: "lista-onibus.firebasestorage.app",
-  messagingSenderId: "140892082129",
-  appId: "1:140892082129:web:b1ab4052d750e03345daf0"
-};
-
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-console.log("Firebase conectado com sucesso");
-
-let lista = [];
-let removidosAtrasados = [];
-
-// RESET AUTOMÁTICO ÀS 03:00
-
-const hoje = new Date().toLocaleDateString();
-const ultimoReset = localStorage.getItem('ultimoReset');
-const horaAtual = new Date().getHours();
-
-if (horaAtual >= 3 && ultimoReset !== hoje) {
-
-  localStorage.setItem('ultimoReset', hoje);
-
-}
-
-// SINCRONIZAÇÃO EM TEMPO REAL
-
-onSnapshot(collection(db, "listaExecutivos"), (snapshot) => {
-
-  lista = [];
-
-  snapshot.forEach((docItem) => {
-
-    lista.push({
-      id: docItem.id,
-      ...docItem.data()
-    });
-
-  });
-
-  atualizarTela();
-
-});
-
-function horarioEmMinutos() {
-
-  const agora = new Date();
-
-  return agora.getHours() * 60 + agora.getMinutes();
-}
-
-function podeRemoverSemAtraso() {
-
-  return horarioEmMinutos() <= 900;
-}
-
-window.adicionarNome = async function() {
-
-  const nome = document.getElementById('nome').value.trim();
-
-  const instituicao = document.getElementById('instituicao').value.trim();
-
-  const onibus = document.getElementById('onibus').value;
-
-  if (!nome || !instituicao) {
-
-    alert('Preencha nome e instituição');
-
-    return;
-  }
-
-  const pessoaExistente = lista.find(item =>
-    item.nome.toLowerCase() === nome.toLowerCase()
-  );
-
-  if (pessoaExistente) {
-
-    await deleteDoc(
-      doc(db, "listaExecutivos", pessoaExistente.id)
-    );
-  }
-
-  await addDoc(collection(db, "listaExecutivos"), {
-
-    nome,
-    instituicao,
-    onibus
-
-  });
-
-  document.getElementById('nome').value = '';
-  document.getElementById('instituicao').value = '';
-
-  alert('Nome adicionado');
-
-}
-
-window.removerNome = async function() {
-
-  const nome = document.getElementById('nome').value.trim();
-
-  if (!nome) {
-
-    alert('Digite seu nome');
-
-    return;
-  }
-
-  const pessoa = lista.find(item =>
-    item.nome.toLowerCase() === nome.toLowerCase()
-  );
-
-  if (!pessoa) {
-
-    alert('Nome não encontrado');
-
-    return;
-  }
-
-  if (!podeRemoverSemAtraso()) {
-
-    removidosAtrasados.push({
-
-      nome: pessoa.nome,
-      instituicao: pessoa.instituicao,
-      onibus: pessoa.onibus,
-      horario: new Date().toLocaleTimeString()
-
-    });
-
-  }
-
-  await deleteDoc(doc(db, "listaExecutivos", pessoa.id));
-
-  alert('Nome removido');
-
-}
-
-function atualizarTela() {
-
-  const listaElement = document.getElementById('lista');
-
-  const atrasadosElement = document.getElementById('listaAtrasados');
-
-  const totaisElement = document.getElementById('totaisInstituicao');
-
-  const totaisRemovidosElement = document.getElementById('totaisRemovidos');
-
-  let texto = '';
-
-  const onibusLista = ['Executivo 1', 'Executivo Uninta'];
-
-  onibusLista.forEach(onibus => {
-
-    texto += onibus.toUpperCase() + '\n\n';
-
-    const pessoas = lista.filter(item =>
-      item.onibus === onibus
-    );
-
-    if (pessoas.length === 0) {
-
-      texto += '- Nenhuma pessoa\n\n';
-
-    } else {
-
-      pessoas.forEach(pessoa => {
-
-        texto += '- ' + pessoa.nome + ' | ' + pessoa.instituicao + '\n';
-
-      });
-
-      texto += '\n';
-    }
-
-    texto += '------------------------\n\n';
-
-  });
-
-  listaElement.textContent = texto;
-
-  // ATRASADOS
-
-  let atrasadosTexto = '';
-
-  if (removidosAtrasados.length === 0) {
-
-    atrasadosTexto = 'Nenhuma remoção após 15:00';
-
-  } else {
-
-    removidosAtrasados.forEach(item => {
-
-      atrasadosTexto +=
-        '- ' +
-        item.nome +
-        ' | ' +
-        item.instituicao +
-        ' | ' +
-        item.onibus +
-        ' | ' +
-        item.horario +
-        '\n';
-
-    });
-
-  }
-
-  atrasadosElement.textContent = atrasadosTexto;
-
-  // TOTAL INSTITUIÇÕES
-
-  let contagemInstituicoes = {};
-
-  lista.forEach(item => {
-
-    const chave = item.instituicao.toUpperCase();
-
-    if (!contagemInstituicoes[chave]) {
-
-      contagemInstituicoes[chave] = 0;
-
-    }
-
-    contagemInstituicoes[chave]++;
-
-  });
-
-  let textoTotais = '';
-
-  for (let instituicao in contagemInstituicoes) {
-
-    textoTotais +=
-      instituicao +
-      ': ' +
-      contagemInstituicoes[instituicao] +
-      ' pessoa(s)\n';
-
-  }
-
-  totaisElement.textContent =
-    textoTotais || 'Nenhuma pessoa na lista';
-
-  // TOTAL REMOVIDOS
-
-  let contagemRemovidos = {};
-
-  removidosAtrasados.forEach(item => {
-
-    const chave = item.instituicao.toUpperCase();
-
-    if (!contagemRemovidos[chave]) {
-
-      contagemRemovidos[chave] = 0;
-
-    }
-
-    contagemRemovidos[chave]++;
-
-  });
-
-  let textoRemovidos = '';
-
-  for (let instituicao in contagemRemovidos) {
-
-    textoRemovidos +=
-      instituicao +
-      ': ' +
-      contagemRemovidos[instituicao] +
-      ' pessoa(s)\n';
-
-  }
-
-  totaisRemovidosElement.textContent =
-    textoRemovidos || 'Nenhum removido após 15:00';
-
-}
-
-</script>
-
-</body>
+    .btn-copy {
 </html>
