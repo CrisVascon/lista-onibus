@@ -9,22 +9,42 @@
 
   <style>
 
+    :root {
+      --azul: #0b1f44;
+      --dourado: #c8a95b;
+      --fundo: #f4f4f4;
+      --texto: #111;
+      --card: white;
+    }
+
+    body.dark {
+      --fundo: #08111f;
+      --texto: #ffffff;
+      --card: #13233f;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: var(--fundo);
       margin: 0;
       padding: 20px;
       max-width: 1100px;
       margin: auto;
+      color: var(--texto);
+      transition: 0.3s;
     }
 
     h1 {
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 2px;
       text-align: center;
       margin-bottom: 30px;
     }
 
     .card {
-      background: white;
+      background: var(--card);
+      border-top: 5px solid var(--dourado);
       padding: 20px;
       border-radius: 15px;
       margin-bottom: 20px;
@@ -57,6 +77,22 @@
     .btn-remove {
       background: #e74c3c;
       color: white;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-theme {
+      background: var(--azul);
+      color: white;
+    }
+
+    .btn-admin {
+      background: var(--dourado);
+      color: black;
     }
 
     .btn-copy {
@@ -105,6 +141,16 @@
 
 <h1>Lista dos Executivos</h1>
 
+<div class="topbar">
+  <button class="btn-theme" onclick="alternarTema()">
+    🌙 Tema Claro/Escuro
+  </button>
+
+  <button class="btn-admin" onclick="abrirAdmin()">
+    🔐 Painel Admin
+  </button>
+</div>
+
 <div class="card">
 
   <label>Escolha o ônibus</label>
@@ -131,7 +177,7 @@
   </button>
 
   <button class="btn-copy" onclick="copiarLista()">
-    Copiar Lista Para WhatsApp
+    📋 Copiar Lista Para WhatsApp
   </button>
 
 </div>
@@ -167,13 +213,27 @@
 
 <div class="card">
   <h2>Total por Instituição</h2>
+</div>
+
+<div class="card">
+  <h2>🚫 Pessoas Fora do Horário</h2>
+  <pre id="foraHorario"></pre>
   <pre id="totaisInstituicao"></pre>
 </div>
 
 <div class="card">
-  <h2>Removidos Após 15:00</h2>
+  <h2>⏰ Contador para Fechamento da Lista</h2>
+  <div id="contador" style="font-size:30px;font-weight:bold;text-align:center;"></div>
+</div>
+
+<div class="card">
+  <h2>⚠️ Removidos Após 15:00</h2>
   <pre id="listaAtrasados"></pre>
 </div>
+
+<audio id="somEntrada">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+</audio>
 
 <script type="module">
 
@@ -202,6 +262,7 @@ const db = getFirestore(app);
 
 let lista = [];
 let removidosAtrasados = [];
+let foraHorario = [];
 
 const grafico = new Chart(document.getElementById('grafico'), {
   type: 'bar',
@@ -235,6 +296,8 @@ onSnapshot(collection(db, "listaExecutivos"), (snapshot) => {
 
   });
 
+  document.getElementById('somEntrada').play();
+
   atualizarTela();
 
 });
@@ -245,6 +308,56 @@ function horarioEmMinutos() {
 
   return agora.getHours() * 60 + agora.getMinutes();
 }
+
+window.alternarTema = function() {
+
+  document.body.classList.toggle('dark');
+
+}
+
+window.abrirAdmin = function() {
+
+  const senha = prompt('Digite a senha do admin');
+
+  if (senha !== 'ronaldinhogauchopenta') {
+
+    alert('Senha incorreta');
+    return;
+  }
+
+  alert('Painel admin liberado');
+
+}
+
+function atualizarContador() {
+
+  const agora = new Date();
+
+  const limite = new Date();
+
+  limite.setHours(10);
+  limite.setMinutes(30);
+  limite.setSeconds(0);
+
+  const diferenca = limite - agora;
+
+  if (diferenca <= 0) {
+
+    document.getElementById('contador').textContent = 'LISTA ENCERRADA';
+
+    return;
+  }
+
+  const horas = Math.floor(diferenca / 1000 / 60 / 60);
+  const minutos = Math.floor((diferenca / 1000 / 60) % 60);
+  const segundos = Math.floor((diferenca / 1000) % 60);
+
+  document.getElementById('contador').textContent =
+    horas + 'h ' + minutos + 'm ' + segundos + 's';
+
+}
+
+setInterval(atualizarContador, 1000);
 
 window.adicionarNome = async function () {
 
@@ -264,6 +377,16 @@ window.adicionarNome = async function () {
   if (existente) {
 
     await deleteDoc(doc(db, 'listaExecutivos', existente.id));
+  }
+
+  const horaAtual = horarioEmMinutos();
+
+  if (horaAtual < 420 || horaAtual > 630) {
+
+    foraHorario.push({
+      horario: new Date().toLocaleTimeString()
+    });
+
   }
 
   await addDoc(collection(db, 'listaExecutivos'), {
