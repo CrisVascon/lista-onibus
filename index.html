@@ -1,238 +1,290 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Executivos Online</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Lista dos Ônibus</title>
 
-  <style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    :root {
-      --azul: #0b1f44;
-      --dourado: #c8a95b;
-      --fundo: #f4f4f4;
-      --texto: #111;
-      --card: white;
-    }
+<style>
 
-    body.dark {
-      --fundo: #08111f;
-      --texto: #ffffff;
-      --card: #13233f;
-    }
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f7fa;
+    margin:0;
+    padding:20px;
+    color:#111;
+}
 
-    body {
-      font-family: Arial, sans-serif;
-      background: var(--fundo);
-      margin: 0;
-      padding: 20px;
-      max-width: 1100px;
-      margin: auto;
-      color: var(--texto);
-      transition: 0.3s;
-    }
+header{
+    background:linear-gradient(90deg,#0b1f44,#133b7a);
+    color:white;
+    padding:25px;
+    border-radius:20px;
+    margin-bottom:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
 
-    h1 {
-      color: var(--azul);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      text-align: center;
-      margin-bottom: 30px;
-    }
+header h1{
+    margin:0;
+    font-size:40px;
+    text-align:center;
+    letter-spacing:2px;
+}
 
-    .card {
-      background: var(--card);
-      border-top: 5px solid var(--dourado);
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
+.sub{
+    text-align:center;
+    margin-top:10px;
+    color:#d4af37;
+    font-weight:bold;
+}
 
-    input,
-    select,
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
 
-    button {
-      cursor: pointer;
-      border: none;
-      font-weight: bold;
-    }
+.card{
+    background:white;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    border-top:5px solid #d4af37;
+}
 
-    .btn-add {
-      background: #2ecc71;
-      color: white;
-    }
+input,select,button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+    font-size:16px;
+}
 
-    .btn-remove {
-      background: #e74c3c;
-      color: white;
-    }
+button{
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.2s;
+}
 
-    .topbar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+button:hover{
+    transform:scale(1.02);
+}
 
-    .btn-theme {
-      background: var(--azul);
-      color: white;
-    }
+.btn-add{
+    background:#2ecc71;
+    color:white;
+}
 
-    .btn-admin {
-      background: var(--dourado);
-      color: black;
-    }
+.btn-remove{
+    background:#e74c3c;
+    color:white;
+}
 
-    .btn-copy {
-      background: #3498db;
-      color: white;
-    }
+.btn-copy{
+    background:#3498db;
+    color:white;
+}
 
-    pre {
-      background: #222;
-      color: #0f0;
-      padding: 15px;
-      border-radius: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      font-size: 15px;
-    }
+.btn-admin{
+    background:#0b1f44;
+    color:white;
+}
 
-    .totais {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
+.mini{
+    background:#f1f1f1;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+}
 
-    .mini-card {
-      background: #fafafa;
-      padding: 15px;
-      border-radius: 12px;
-      text-align: center;
-      border: 1px solid #ddd;
-    }
+.numero{
+    font-size:40px;
+    font-weight:bold;
+    margin-top:10px;
+}
 
-    .numero {
-      font-size: 35px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
+pre{
+    background:#111;
+    color:#00ff66;
+    padding:15px;
+    border-radius:15px;
+    overflow:auto;
+    white-space:pre-wrap;
+}
 
-    canvas {
-      margin-top: 20px;
-    }
+#contador{
+    font-size:35px;
+    text-align:center;
+    font-weight:bold;
+    color:#0b1f44;
+}
 
-  </style>
+.online{
+    color:#2ecc71;
+    font-weight:bold;
+    text-align:center;
+    margin-top:10px;
+}
+
+.loading{
+    position:fixed;
+    inset:0;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:35px;
+    font-weight:bold;
+    z-index:9999;
+}
+
+</style>
 </head>
 
 <body>
 
-<h1>Lista dos Executivos</h1>
+<div class="loading" id="loading">
+Carregando...
+</div>
 
-<div class="topbar">
-  <button class="btn-theme" onclick="alternarTema()">
-    🌙 Tema Claro/Escuro
-  </button>
+<header>
 
-  <button class="btn-admin" onclick="abrirAdmin()">
-    🔐 Painel Admin
-  </button>
+<h1>Lista dos Ônibus</h1>
+
+<div class="sub">
+Sistema Online em Tempo Real
+</div>
+
+<div class="online" id="online">
+0 pessoas online
+</div>
+
+</header>
+
+<div class="card">
+
+<button class="btn-admin" onclick="abrirAdmin()">
+🔐 Entrar no Painel Admin
+</button>
+
+<button class="btn-admin" onclick="sairAdmin()">
+🚪 Sair do Admin
+</button>
+
+<label>Escolha o ônibus</label>
+
+<select id="onibus">
+<option value="Executivo 1">Executivo 1</option>
+<option value="Executivo Uninta">Executivo Uninta</option>
+</select>
+
+<label>Nome</label>
+
+<input type="text" id="nome" placeholder="Digite seu nome">
+
+<label>Instituição / Parada</label>
+
+<input type="text" id="instituicao" placeholder="Digite sua instituição">
+
+<button class="btn-add" onclick="adicionarNome()">
+➕ Entrar na Lista
+</button>
+
+<button class="btn-remove" onclick="removerNome()">
+➖ Tirar Meu Nome
+</button>
+
+<button class="btn-copy" onclick="copiarLista()">
+📋 Copiar Lista
+</button>
+
 </div>
 
 <div class="card">
 
-  <label>Escolha o ônibus</label>
+<h2>⏰ Contador</h2>
 
-  <select id="onibus">
-    <option value="Executivo 1">Executivo 1</option>
-    <option value="Executivo Uninta">Executivo Uninta</option>
-  </select>
-
-  <label>Seu nome</label>
-
-  <input type="text" id="nome" placeholder="Digite seu nome">
-
-  <label>Instituição / Parada</label>
-
-  <input type="text" id="instituicao" placeholder="Digite sua instituição">
-
-  <button class="btn-add" onclick="adicionarNome()">
-    Entrar na Lista
-  </button>
-
-  <button class="btn-remove" onclick="removerNome()">
-    Tirar Meu Nome
-  </button>
-
-  <button class="btn-copy" onclick="copiarLista()">
-    📋 Copiar Lista Para WhatsApp
-  </button>
+<div id="contador"></div>
 
 </div>
 
-<div class="totais">
+<div class="grid">
 
-  <div class="mini-card">
-    Executivo 1
-    <div class="numero" id="totalExec1">0</div>
-  </div>
+<div class="mini">
+Executivo 1
+<div class="numero" id="totalExec1">0</div>
+</div>
 
-  <div class="mini-card">
-    Executivo Uninta
-    <div class="numero" id="totalExec2">0</div>
-  </div>
+<div class="mini">
+Executivo Uninta
+<div class="numero" id="totalExec2">0</div>
+</div>
 
-  <div class="mini-card">
-    Total Geral
-    <div class="numero" id="totalGeral">0</div>
-  </div>
+<div class="mini">
+Lista Extra
+<div class="numero" id="totalExtra">0</div>
+</div>
+
+<div class="mini">
+Total Geral
+<div class="numero" id="totalGeral">0</div>
+</div>
 
 </div>
 
 <div class="card">
-  <h2>Gráfico em Tempo Real</h2>
-  <canvas id="grafico"></canvas>
+
+<h2>📊 Quantidade de Pessoas</h2>
+
+<canvas id="grafico"></canvas>
+
 </div>
 
 <div class="card">
-  <h2>Lista Atual</h2>
-  <pre id="lista"></pre>
+
+<h2>🏆 Ranking de Instituições</h2>
+
+<pre id="ranking"></pre>
+
 </div>
 
 <div class="card">
-  <h2>Total por Instituição</h2>
+
+<h2>🚌 Lista Atual</h2>
+
+<pre id="lista"></pre>
+
 </div>
 
 <div class="card">
-  <h2>🚫 Pessoas Fora do Horário</h2>
-  <pre id="foraHorario"></pre>
-  <pre id="totaisInstituicao"></pre>
+
+<h2>⚠️ Infrações</h2>
+
+<pre id="infractions"></pre>
+
 </div>
 
-<div class="card">
-  <h2>⏰ Contador para Fechamento da Lista</h2>
-  <div id="contador" style="font-size:30px;font-weight:bold;text-align:center;"></div>
+<div class="card" id="painelAdmin" style="display:none;">
+
+<h2>🔐 Painel Administrativo</h2>
+
+<button class="btn-copy" onclick="copiarInfrações()">
+📋 Copiar Infrações
+</button>
+
+<pre id="adminLista"></pre>
+
 </div>
 
-<div class="card">
-  <h2>⚠️ Removidos Após 15:00</h2>
-  <pre id="listaAtrasados"></pre>
-</div>
-
-<audio id="somEntrada">
-  <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+<audio id="somEntrada" preload="auto">
+<source src="fortnite-knocked.mp3" type="audio/mpeg">
 </audio>
 
 <script type="module">
@@ -240,334 +292,417 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
+getFirestore,
+collection,
+addDoc,
+deleteDoc,
+doc,
+onSnapshot,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCIKs2HxpBQVflmvybEwgSiC3M0Q-abbXc",
-  authDomain: "lista-onibus.firebaseapp.com",
-  projectId: "lista-onibus",
-  storageBucket: "lista-onibus.firebasestorage.app",
-  messagingSenderId: "140892082129",
-  appId: "1:140892082129:web:b1ab4052d750e03345daf0"
+apiKey: "SUA_API",
+authDomain: "lista-onibus.firebaseapp.com",
+projectId: "lista-onibus",
+storageBucket: "lista-onibus.firebasestorage.app",
+messagingSenderId: "140892082129",
+appId: "1:140892082129:web:b1ab4052d750e03345daf0"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let lista = [];
-let removidosAtrasados = [];
-let foraHorario = [];
+let infrações = [];
+let adminAtivo = false;
 
-const grafico = new Chart(document.getElementById('grafico'), {
-  type: 'bar',
-  data: {
-    labels: ['Executivo 1', 'Executivo Uninta'],
-    datasets: [{
-      label: 'Quantidade de Pessoas',
-      data: [0, 0]
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
+const grafico = new Chart(
+document.getElementById('grafico'),
+{
+type:'bar',
+data:{
+labels:['Executivo 1','Executivo Uninta','Lista Extra'],
+datasets:[{
+label:'Pessoas',
+data:[0,0,0]
+}]
+}
+}
+);
+
+function horarioMinutos(){
+
+const agora = new Date();
+
+return agora.getHours()*60 + agora.getMinutes();
+
+}
+
+function atualizarContador(){
+
+const agora = new Date();
+
+const alvo = new Date();
+
+alvo.setHours(10);
+alvo.setMinutes(30);
+alvo.setSeconds(0);
+
+const dif = alvo - agora;
+
+if(dif <= 0){
+
+document.getElementById('contador').innerHTML =
+'HORÁRIO ENCERRADO';
+
+return;
+}
+
+const h = Math.floor(dif/1000/60/60);
+const m = Math.floor((dif/1000/60)%60);
+const s = Math.floor((dif/1000)%60);
+
+document.getElementById('contador').innerHTML =
+h+'h '+m+'m '+s+'s';
+
+}
+
+setInterval(atualizarContador,1000);
+
+window.abrirAdmin = function(){
+
+const senha = prompt('Digite a senha');
+
+if(senha !== 'ronaldinhogauchopenta'){
+
+alert('Senha incorreta');
+
+return;
+}
+
+adminAtivo = true;
+
+document.getElementById('painelAdmin').style.display='block';
+
+alert('Modo administrador ativado');
+
+}
+
+window.sairAdmin = function(){
+
+adminAtivo = false;
+
+document.getElementById('painelAdmin').style.display='none';
+
+}
+
+window.adicionarNome = async function(){
+
+const nome =
+document.getElementById('nome').value.trim();
+
+const instituicao =
+document.getElementById('instituicao').value.trim();
+
+const onibus =
+document.getElementById('onibus').value;
+
+if(!nome || !instituicao){
+
+alert('Preencha tudo');
+
+return;
+}
+
+document.getElementById('somEntrada').play();
+
+const jaExiste = lista.find(item =>
+item.nome.toLowerCase() === nome.toLowerCase()
+);
+
+if(jaExiste){
+
+alert('Esse nome já está na lista');
+
+return;
+}
+
+let listaDestino = onibus;
+
+const totalMesmo =
+lista.filter(item => item.onibus === onibus).length;
+
+if(totalMesmo >= 46){
+
+listaDestino = 'Lista Extra';
+
+}
+
+const agora = new Date();
+
+const minutos = horarioMinutos();
+
+if(minutos < 420 || minutos > 630){
+
+infrações.push({
+nome,
+instituicao,
+tipo:'ENTRADA FORA DO HORÁRIO',
+horario:agora.toLocaleTimeString()
 });
 
-onSnapshot(collection(db, "listaExecutivos"), (snapshot) => {
+}
 
-  lista = [];
+await addDoc(collection(db,'listaExecutivos'),{
 
-  snapshot.forEach((docItem) => {
-
-    lista.push({
-      id: docItem.id,
-      ...docItem.data()
-    });
-
-  });
-
-  document.getElementById('somEntrada').play();
-
-  atualizarTela();
+nome,
+instituicao,
+onibus:listaDestino,
+timestamp:Date.now()
 
 });
 
-function horarioEmMinutos() {
-
-  const agora = new Date();
-
-  return agora.getHours() * 60 + agora.getMinutes();
 }
 
-window.alternarTema = function() {
+window.removerNome = async function(){
 
-  document.body.classList.toggle('dark');
+const nome =
+document.getElementById('nome').value.trim();
 
+const pessoa = lista.find(item =>
+item.nome.toLowerCase() === nome.toLowerCase()
+);
+
+if(!pessoa){
+
+alert('Nome não encontrado');
+
+return;
 }
 
-window.abrirAdmin = function() {
+const agora = new Date();
 
-  const senha = prompt('Digite a senha do admin');
+if(horarioMinutos() > 900){
 
-  if (senha !== 'ronaldinhogauchopenta') {
-
-    alert('Senha incorreta');
-    return;
-  }
-
-  alert('Painel admin liberado');
-
-}
-
-function atualizarContador() {
-
-  const agora = new Date();
-
-  const limite = new Date();
-
-  limite.setHours(10);
-  limite.setMinutes(30);
-  limite.setSeconds(0);
-
-  const diferenca = limite - agora;
-
-  if (diferenca <= 0) {
-
-    document.getElementById('contador').textContent = 'LISTA ENCERRADA';
-
-    return;
-  }
-
-  const horas = Math.floor(diferenca / 1000 / 60 / 60);
-  const minutos = Math.floor((diferenca / 1000 / 60) % 60);
-  const segundos = Math.floor((diferenca / 1000) % 60);
-
-  document.getElementById('contador').textContent =
-    horas + 'h ' + minutos + 'm ' + segundos + 's';
+infrações.push({
+nome:pessoa.nome,
+instituicao:pessoa.instituicao,
+tipo:'REMOVEU APÓS 15:00',
+horario:agora.toLocaleTimeString()
+});
 
 }
 
-setInterval(atualizarContador, 1000);
-
-window.adicionarNome = async function () {
-
-  const nome = document.getElementById('nome').value.trim();
-  const instituicao = document.getElementById('instituicao').value.trim();
-  const onibus = document.getElementById('onibus').value;
-
-  if (!nome || !instituicao) {
-    alert('Preencha todos os campos');
-    return;
-  }
-
-  const existente = lista.find(item =>
-    item.nome.toLowerCase() === nome.toLowerCase()
-  );
-
-  if (existente) {
-
-    await deleteDoc(doc(db, 'listaExecutivos', existente.id));
-  }
-
-  const horaAtual = horarioEmMinutos();
-
-  if (horaAtual < 420 || horaAtual > 630) {
-
-    foraHorario.push({
-      horario: new Date().toLocaleTimeString()
-    });
-
-  }
-
-  await addDoc(collection(db, 'listaExecutivos'), {
-    nome,
-    instituicao,
-    onibus,
-    horario: new Date().toLocaleTimeString()
-  });
-
-  document.getElementById('nome').value = '';
-  document.getElementById('instituicao').value = '';
-
-  alert('Nome adicionado');
+await deleteDoc(doc(db,'listaExecutivos',pessoa.id));
 
 }
 
-window.removerNome = async function () {
+window.copiarLista = function(){
 
-  const nome = document.getElementById('nome').value.trim();
+let texto = 'LISTA DOS ÔNIBUS\n\n';
 
-  if (!nome) {
-    alert('Digite seu nome');
-    return;
-  }
+lista.forEach((item,index)=>{
 
-  const pessoa = lista.find(item =>
-    item.nome.toLowerCase() === nome.toLowerCase()
-  );
+texto +=
+(index+1)+'. '+
+item.nome+' | '+
+item.instituicao+' | '+
+item.onibus+'\n';
 
-  if (!pessoa) {
-    alert('Nome não encontrado');
-    return;
-  }
+});
 
-  if (horarioEmMinutos() > 900) {
+navigator.clipboard.writeText(texto);
 
-    removidosAtrasados.push({
-      nome: pessoa.nome,
-      instituicao: pessoa.instituicao,
-      onibus: pessoa.onibus,
-      horario: new Date().toLocaleTimeString()
-    });
-
-  }
-
-  await deleteDoc(doc(db, 'listaExecutivos', pessoa.id));
-
-  atualizarTela();
-
-  alert('Nome removido');
+alert('Lista copiada');
 
 }
 
-window.copiarLista = function () {
+window.copiarInfrações = function(){
 
-  let texto = 'LISTA DOS EXECUTIVOS\n\n';
+let texto = '';
 
-  const exec1 = lista.filter(item => item.onibus === 'Executivo 1');
-  const exec2 = lista.filter(item => item.onibus === 'Executivo Uninta');
+infrações.forEach(item=>{
 
-  texto += 'EXECUTIVO 1\n\n';
+texto +=
+item.nome+' | '+
+item.instituicao+' | '+
+item.tipo+' | '+
+item.horario+'\n';
 
-  exec1.forEach(item => {
-    texto += '- ' + item.nome + ' | ' + item.instituicao + '\n';
-  });
+});
 
-  texto += '\n-----------------------\n\n';
+navigator.clipboard.writeText(texto);
 
-  texto += 'EXECUTIVO UNINTA\n\n';
-
-  exec2.forEach(item => {
-    texto += '- ' + item.nome + ' | ' + item.instituicao + '\n';
-  });
-
-  navigator.clipboard.writeText(texto);
-
-  alert('Lista copiada para colar no WhatsApp');
+alert('Infrações copiadas');
 
 }
 
-function atualizarTela() {
+onSnapshot(collection(db,'listaExecutivos'),(snapshot)=>{
 
-  const listaElement = document.getElementById('lista');
-  const totaisElement = document.getElementById('totaisInstituicao');
-  const atrasadosElement = document.getElementById('listaAtrasados');
+lista = [];
 
-  let texto = '';
+snapshot.forEach((docItem)=>{
 
-  const onibusLista = ['Executivo 1', 'Executivo Uninta'];
+lista.push({
+id:docItem.id,
+...docItem.data()
+});
 
-  onibusLista.forEach(onibus => {
+});
 
-    texto += onibus.toUpperCase() + '\n\n';
+atualizarTela();
 
-    const pessoas = lista.filter(item => item.onibus === onibus);
+});
 
-    if (pessoas.length === 0) {
+function atualizarTela(){
 
-      texto += '- Nenhuma pessoa\n\n';
+lista.sort((a,b)=>{
 
-    } else {
+if(a.timestamp === b.timestamp){
 
-      pessoas.forEach(pessoa => {
-
-        texto += '- ' + pessoa.nome + ' | ' + pessoa.instituicao + '\n';
-
-      });
-
-      texto += '\n';
-    }
-
-    texto += '--------------------------\n\n';
-
-  });
-
-  listaElement.textContent = texto;
-
-  let contagemInstituicoes = {};
-
-  lista.forEach(item => {
-
-    const chave = item.instituicao.toUpperCase();
-
-    if (!contagemInstituicoes[chave]) {
-      contagemInstituicoes[chave] = 0;
-    }
-
-    contagemInstituicoes[chave]++;
-
-  });
-
-  let textoTotais = '';
-
-  for (let instituicao in contagemInstituicoes) {
-
-    textoTotais +=
-      instituicao +
-      ': ' +
-      contagemInstituicoes[instituicao] +
-      ' pessoa(s)\n';
-
-  }
-
-  totaisElement.textContent = textoTotais || 'Nenhuma pessoa';
-
-  let atrasadosTexto = '';
-
-  if (removidosAtrasados.length === 0) {
-
-    atrasadosTexto = 'Nenhum removido após 15:00';
-
-  } else {
-
-    removidosAtrasados.forEach(item => {
-
-      atrasadosTexto +=
-        '- ' +
-        item.nome +
-        ' | ' +
-        item.instituicao +
-        ' | ' +
-        item.horario +
-        '\n';
-
-    });
-
-  }
-
-  atrasadosElement.textContent = atrasadosTexto;
-
-  const totalExec1 = lista.filter(item => item.onibus === 'Executivo 1').length;
-  const totalExec2 = lista.filter(item => item.onibus === 'Executivo Uninta').length;
-
-  document.getElementById('totalExec1').textContent = totalExec1;
-  document.getElementById('totalExec2').textContent = totalExec2;
-  document.getElementById('totalGeral').textContent = lista.length;
-
-  grafico.data.datasets[0].data = [totalExec1, totalExec2];
-  grafico.update();
+return a.nome.localeCompare(b.nome);
 
 }
+
+return a.timestamp - b.timestamp;
+
+});
+
+let texto = '';
+
+['Executivo 1','Executivo Uninta','Lista Extra']
+.forEach(onibus=>{
+
+texto += onibus.toUpperCase()+'\n\n';
+
+const pessoas =
+lista.filter(item=>item.onibus===onibus);
+
+if(pessoas.length === 0){
+
+texto += '- vazio\n\n';
+
+}else{
+
+pessoas.forEach((pessoa,index)=>{
+
+texto +=
+(index+1)+'. '+
+pessoa.nome+' | '+
+pessoa.instituicao+'\n';
+
+});
+
+}
+
+texto += '\n-------------------\n\n';
+
+});
+
+document.getElementById('lista').textContent =
+texto;
+
+const total1 =
+lista.filter(x=>x.onibus==='Executivo 1').length;
+
+const total2 =
+lista.filter(x=>x.onibus==='Executivo Uninta').length;
+
+const totalExtra =
+lista.filter(x=>x.onibus==='Lista Extra').length;
+
+document.getElementById('totalExec1').innerHTML =
+total1;
+
+document.getElementById('totalExec2').innerHTML =
+total2;
+
+document.getElementById('totalExtra').innerHTML =
+totalExtra;
+
+document.getElementById('totalGeral').innerHTML =
+lista.length;
+
+grafico.data.datasets[0].data = [
+total1,
+total2,
+totalExtra
+];
+
+grafico.update();
+
+let ranking = {};
+
+lista.forEach(item=>{
+
+const chave =
+item.instituicao.toUpperCase();
+
+ranking[chave] =
+(ranking[chave] || 0) + 1;
+
+});
+
+let rankingTexto = '';
+
+Object.entries(ranking)
+.sort((a,b)=>b[1]-a[1])
+.forEach(([nome,total],index)=>{
+
+rankingTexto +=
+(index+1)+'. '+
+nome+' - '+
+total+' pessoa(s)\n';
+
+});
+
+document.getElementById('ranking').textContent =
+rankingTexto || 'Sem dados';
+
+document.getElementById('infractions').textContent =
+'Entradas fora do horário: '+
+infrações.filter(x=>x.tipo.includes('ENTRADA')).length+
+'\nRemoções após 15h: '+
+infrações.filter(x=>x.tipo.includes('REMOVEU')).length;
+
+if(adminAtivo){
+
+let adminTexto = '';
+
+infrações.forEach(item=>{
+
+adminTexto +=
+item.nome+' | '+
+item.instituicao+' | '+
+item.tipo+' | '+
+item.horario+'\n';
+
+});
+
+document.getElementById('adminLista').textContent =
+adminTexto;
+
+}
+
+document.getElementById('online').innerHTML =
+lista.length + ' pessoas online';
+
+const agora = new Date();
+
+if(agora.getHours() >= 3){
+
+infrações = [];
+
+}
+
+}
+
+setTimeout(()=>{
+
+document.getElementById('loading').style.display='none';
+
+},1500);
 
 </script>
 
