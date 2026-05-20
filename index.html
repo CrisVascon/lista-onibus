@@ -6,6 +6,7 @@
   <title>Lista dos Executivos</title>
 
   <style>
+
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
@@ -66,29 +67,35 @@
       margin-bottom: 20px;
       font-weight: bold;
     }
+
   </style>
+
 </head>
+
 <body>
 
 <h1>Lista dos Executivos</h1>
 
 <div class="horario">
-  Adicionar nomes: Segunda a Sexta | 07:00 até 10:30<br>
-  Remover nomes sem aviso: até 15:00
+  Adicionar nomes: livre para testes<br>
+  Remover sem aviso: até 15:00
 </div>
 
 <div class="card">
 
   <label>Escolha o ônibus</label>
+
   <select id="onibus">
     <option value="Executivo 1">Executivo 1</option>
     <option value="Executivo Uninta">Executivo Uninta</option>
   </select>
 
   <label>Seu nome</label>
+
   <input type="text" id="nome" placeholder="Digite seu nome">
 
   <label>Instituição / Parada</label>
+
   <input type="text" id="instituicao" placeholder="Digite sua instituição">
 
   <button class="btn-add" onclick="adicionarNome()">
@@ -126,7 +133,8 @@
 let lista = JSON.parse(localStorage.getItem('listaExecutivos')) || [];
 let removidosAtrasados = JSON.parse(localStorage.getItem('removidosAtrasados')) || [];
 
-// RESET AUTOMÁTICO ÀS 03:00
+// RESET ÀS 03:00
+
 const hoje = new Date().toLocaleDateString();
 const ultimoReset = localStorage.getItem('ultimoReset');
 const horaAtual = new Date().getHours();
@@ -139,59 +147,47 @@ if (horaAtual >= 3 && ultimoReset !== hoje) {
   localStorage.setItem('listaExecutivos', JSON.stringify(lista));
   localStorage.setItem('removidosAtrasados', JSON.stringify(removidosAtrasados));
   localStorage.setItem('ultimoReset', hoje);
+
 }
 
-
 function salvar() {
+
   localStorage.setItem('listaExecutivos', JSON.stringify(lista));
   localStorage.setItem('removidosAtrasados', JSON.stringify(removidosAtrasados));
 
   atualizarTela();
 }
 
-function agora() {
-  return new Date();
-}
-
-function ehDiaUtil() {
-  const dia = agora().getDay();
-
-  return dia >= 1 && dia <= 5;
-}
-
 function horarioEmMinutos() {
-  const data = agora();
 
-  return data.getHours() * 60 + data.getMinutes();
-}
+  const agora = new Date();
 
-function podeAdicionar() {
-  return true;
+  return agora.getHours() * 60 + agora.getMinutes();
 }
 
 function podeRemoverSemAtraso() {
-  const minutos = horarioEmMinutos();
 
-  return minutos <= 900;
+  return horarioEmMinutos() <= 900;
 }
 
 function adicionarNome() {
 
-  if (!podeAdicionar()) {
-    alert('Só é permitido entrar na lista entre 07:00 e 10:30 de segunda a sexta.');
-    return;
-  }
-
   const nome = document.getElementById('nome').value.trim();
+
   const instituicao = document.getElementById('instituicao').value.trim();
+
   const onibus = document.getElementById('onibus').value;
 
   if (!nome || !instituicao) {
-    alert('Preencha nome e instituição.');
+
+    alert('Preencha nome e instituição');
+
     return;
   }
 
-  lista = lista.filter(item => item.nome.toLowerCase() !== nome.toLowerCase());
+  lista = lista.filter(item =>
+    item.nome.toLowerCase() !== nome.toLowerCase()
+  );
 
   lista.push({
     nome,
@@ -201,7 +197,8 @@ function adicionarNome() {
 
   salvar();
 
-  alert('Nome adicionado com sucesso.');
+  alert('Nome adicionado');
+
 }
 
 function removerNome() {
@@ -209,14 +206,20 @@ function removerNome() {
   const nome = document.getElementById('nome').value.trim();
 
   if (!nome) {
-    alert('Digite seu nome.');
+
+    alert('Digite seu nome');
+
     return;
   }
 
-  const pessoa = lista.find(item => item.nome.toLowerCase() === nome.toLowerCase());
+  const pessoa = lista.find(item =>
+    item.nome.toLowerCase() === nome.toLowerCase()
+  );
 
   if (!pessoa) {
-    alert('Nome não encontrado.');
+
+    alert('Nome não encontrado');
+
     return;
   }
 
@@ -226,22 +229,29 @@ function removerNome() {
       nome: pessoa.nome,
       instituicao: pessoa.instituicao,
       onibus: pessoa.onibus,
-      horario: agora().toLocaleTimeString()
+      horario: new Date().toLocaleTimeString()
     });
+
   }
 
-  lista = lista.filter(item => item.nome.toLowerCase() !== nome.toLowerCase());
+  lista = lista.filter(item =>
+    item.nome.toLowerCase() !== nome.toLowerCase()
+  );
 
   salvar();
 
-  alert('Nome removido da lista.');
+  alert('Nome removido');
+
 }
 
 function atualizarTela() {
 
   const listaElement = document.getElementById('lista');
+
   const atrasadosElement = document.getElementById('listaAtrasados');
+
   const totaisElement = document.getElementById('totaisInstituicao');
+
   const totaisRemovidosElement = document.getElementById('totaisRemovidos');
 
   let texto = '';
@@ -252,38 +262,61 @@ function atualizarTela() {
 
     texto += onibus.toUpperCase() + '\n\n';
 
-    const pessoas = lista.filter(item => item.onibus === onibus);
+    const pessoas = lista.filter(item =>
+      item.onibus === onibus
+    );
 
     if (pessoas.length === 0) {
+
       texto += '- Nenhuma pessoa\n\n';
+
     } else {
 
       pessoas.forEach(pessoa => {
+
         texto += '- ' + pessoa.nome + ' | ' + pessoa.instituicao + '\n';
+
       });
 
       texto += '\n';
     }
 
-    texto += '----------------------------\n\n';
+    texto += '------------------------\n\n';
+
   });
 
   listaElement.textContent = texto;
 
+  // ATRASADOS
+
   let atrasadosTexto = '';
 
   if (removidosAtrasados.length === 0) {
+
     atrasadosTexto = 'Nenhuma remoção após 15:00';
+
   } else {
 
     removidosAtrasados.forEach(item => {
-      atrasadosTexto += '- ' + item.nome + ' | ' + item.instituicao + ' | ' + item.onibus + ' | ' + item.horario + '\n';
+
+      atrasadosTexto +=
+        '- ' +
+        item.nome +
+        ' | ' +
+        item.instituicao +
+        ' | ' +
+        item.onibus +
+        ' | ' +
+        item.horario +
+        '\n';
+
     });
+
   }
 
   atrasadosElement.textContent = atrasadosTexto;
 
-  // TOTAL POR INSTITUIÇÃO
+  // TOTAL INSTITUIÇÕES
 
   let contagemInstituicoes = {};
 
@@ -292,26 +325,29 @@ function atualizarTela() {
     const chave = item.instituicao.toUpperCase();
 
     if (!contagemInstituicoes[chave]) {
+
       contagemInstituicoes[chave] = 0;
+
     }
 
     contagemInstituicoes[chave]++;
+
   });
 
   let textoTotais = '';
 
-  if (Object.keys(contagemInstituicoes).length === 0) {
-    textoTotais = 'Nenhuma pessoa na lista';
-  } else {
+  for (let instituicao in contagemInstituicoes) {
 
-    for (let instituicao in contagemInstituicoes) {
-      textoTotais += instituicao + ': ' + contagemInstituicoes[instituicao] + ' pessoa(s)
-';
-    }
+    textoTotais +=
+      instituicao +
+      ': ' +
+      contagemInstituicoes[instituicao] +
+      ' pessoa(s)\n';
+
   }
 
-  totaisElement.textContent = textoTotais;
-
+  totaisElement.textContent =
+    textoTotais || 'Nenhuma pessoa na lista';
 
   // TOTAL REMOVIDOS
 
@@ -322,28 +358,58 @@ function atualizarTela() {
     const chave = item.instituicao.toUpperCase();
 
     if (!contagemRemovidos[chave]) {
+
       contagemRemovidos[chave] = 0;
+
     }
 
     contagemRemovidos[chave]++;
+
   });
 
   let textoRemovidos = '';
 
-  if (Object.keys(contagemRemovidos).length === 0) {
-    textoRemovidos = 'Nenhum removido após 15:00';
-  } else {
+  for (let instituicao in contagemRemovidos) {
 
-    for (let instituicao in contagemRemovidos) {
-      textoRemovidos += instituicao + ': ' + contagemRemovidos[instituicao] + ' pessoa(s)
-';
-    }
+    textoRemovidos +=
+      instituicao +
+      ': ' +
+      contagemRemovidos[instituicao] +
+      ' pessoa(s)\n';
+
   }
 
-  totaisRemovidosElement.textContent = textoRemovidos;
+  totaisRemovidosElement.textContent =
+    textoRemovidos || 'Nenhum removido após 15:00';
+
 }
 
 atualizarTela();
+
+</script>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCIKs2HxpBQVflmvybEwgSiC3M0Q-abbXc",
+  authDomain: "lista-onibus.firebaseapp.com",
+  projectId: "lista-onibus",
+  storageBucket: "lista-onibus.firebasestorage.app",
+  messagingSenderId: "140892082129",
+  appId: "1:140892082129:web:b1ab4052d750e03345daf0"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+console.log("Firebase conectado com sucesso");
 
 </script>
 
